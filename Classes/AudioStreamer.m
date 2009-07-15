@@ -979,6 +979,8 @@ cleanup:
 {
 	@synchronized(self)
 	{
+		if (state == AS_WAITING_FOR_DATA || state == AS_STARTING_FILE_THREAD)
+			return;
 		if (audioQueue &&
 			(state == AS_PLAYING || state == AS_PAUSED ||
 				state == AS_BUFFERING || state == AS_WAITING_FOR_QUEUE_TO_START))
