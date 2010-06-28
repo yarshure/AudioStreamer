@@ -18,6 +18,11 @@
 
 @implementation MacStreamingPlayerController
 
+- (void)awakeFromNib
+{
+	[downloadSourceField setStringValue:@"http://192.168.1.2/~matt/inside.m4a"];
+}
+
 //
 // setButtonImage:
 //
@@ -131,7 +136,7 @@
 	CABasicAnimation *animation;
 	animation = [CABasicAnimation animationWithKeyPath:@"transform.rotation.z"];
 	animation.fromValue = [NSNumber numberWithFloat:0.0];
-	animation.toValue = [NSNumber numberWithFloat:2 * M_PI];
+	animation.toValue = [NSNumber numberWithFloat:-2 * M_PI];
 	animation.timingFunction = [CAMediaTimingFunction functionWithName: kCAMediaTimingFunctionLinear];
 	animation.delegate = self;
 	[button.layer addAnimation:animation forKey:@"rotationAnimation"];
@@ -207,6 +212,23 @@
 }
 
 //
+// sliderMoved:
+//
+// Invoked when the user moves the slider
+//
+// Parameters:
+//    aSlider - the slider (assumed to be the progress slider)
+//
+- (IBAction)sliderMoved:(NSSlider *)aSlider
+{
+	if (streamer.duration)
+	{
+		double newSeekTime = ([aSlider doubleValue] / 100.0) * streamer.duration;
+		[streamer seekToTime:newSeekTime];
+	}
+}
+
+//
 // updateProgress:
 //
 // Invoked when the AudioStreamer
@@ -217,9 +239,21 @@
 	if (streamer.bitRate != 0.0)
 	{
 		double progress = streamer.progress;
-		[positionLabel setStringValue:
-			[NSString stringWithFormat:@"Time Played: %.1f seconds",
-				progress]];
+		double duration = streamer.duration;
+		
+		if (duration > 0)
+		{
+			[positionLabel setStringValue:
+				[NSString stringWithFormat:@"Time Played: %.1f/%.1f seconds",
+					progress,
+					duration]];
+			[progressSlider setEnabled:YES];
+			[progressSlider setDoubleValue:100 * progress / duration];
+		}
+		else
+		{
+			[progressSlider setEnabled:NO];
+		}
 	}
 	else
 	{

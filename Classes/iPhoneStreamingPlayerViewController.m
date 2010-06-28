@@ -204,6 +204,23 @@
 }
 
 //
+// sliderMoved:
+//
+// Invoked when the user moves the slider
+//
+// Parameters:
+//    aSlider - the slider (assumed to be the progress slider)
+//
+- (IBAction)sliderMoved:(UISlider *)aSlider
+{
+	if (streamer.duration)
+	{
+		double newSeekTime = (aSlider.value / 100.0) * streamer.duration;
+		[streamer seekToTime:newSeekTime];
+	}
+}
+
+//
 // playbackStateChanged:
 //
 // Invoked when the AudioStreamer
@@ -237,9 +254,21 @@
 	if (streamer.bitRate != 0.0)
 	{
 		double progress = streamer.progress;
-		positionLabel.text =
-			[NSString stringWithFormat:@"Time Played: %.1f seconds",
-				progress];
+		double duration = streamer.duration;
+		
+		if (duration > 0)
+		{
+			[positionLabel setText:
+				[NSString stringWithFormat:@"Time Played: %.1f/%.1f seconds",
+					progress,
+					duration]];
+			[progressSlider setEnabled:YES];
+			[progressSlider setValue:100 * progress / duration];
+		}
+		else
+		{
+			[progressSlider setEnabled:NO];
+		}
 	}
 	else
 	{
