@@ -133,7 +133,13 @@
 	[super viewDidAppear:animated];
 	[[UIApplication sharedApplication] beginReceivingRemoteControlEvents];
 	[self becomeFirstResponder]; // this enables listening for events
-	[self playbackStateChanged:nil]; // update the UI in case we were in the background
+	// update the UI in case we were in the background
+	NSNotification *notification =
+	[NSNotification
+	 notificationWithName:ASStatusChangedNotification
+	 object:self];
+	[[NSNotificationCenter defaultCenter]
+	 postNotification:notification];
 }
 
 - (BOOL)canBecomeFirstResponder {

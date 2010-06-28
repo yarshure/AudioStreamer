@@ -97,6 +97,7 @@ typedef enum
 } AudioStreamerErrorCode;
 
 extern NSString * const ASStatusChangedNotification;
+extern NSString * const ASPresentAlertWithTitleNotification;
 
 @interface AudioStreamer : NSObject
 {
