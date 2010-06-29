@@ -1347,14 +1347,14 @@ cleanup:
 					if (icyCheck != nil && [icyCheck caseInsensitiveCompare:@"ICY 200 OK"] == NSOrderedSame)	
 					{
 						foundIcyStart = YES;
-						//NSLog(@"ICY 200 OK");				
+						NSLog(@"ICY 200 OK");				
 					}
 					else
 					{
 						// is Live365?
 						// get all the headers
 						NSDictionary *reqHeaders = [(NSDictionary *)CFHTTPMessageCopyAllHeaderFields(myResponse) autorelease];
-						//NSLog(@"reqHeaders: %@", reqHeaders);
+						NSLog(@"reqHeaders: %@", reqHeaders);
 						NSString *serverHeader = [reqHeaders valueForKey:@"Server"];
 						if (serverHeader != nil && NSEqualRanges([serverHeader rangeOfString:@"Nanocaster"], NSMakeRange(0, 10))) {
 							NSLog(@"Wrong stream type - can not continue to parse");
@@ -1416,7 +1416,7 @@ cleanup:
 							if ([[lineItems objectAtIndex:0] caseInsensitiveCompare:@"icy-metaint"] == NSOrderedSame)
 							{
 								metaDataInterval = [[lineItems objectAtIndex:1] intValue];
-								//NSLog(@"ICY MetaInt: %d", metaDataInterval);
+								NSLog(@"ICY MetaInt: %d", metaDataInterval);
 							}
 						}
 						
@@ -1478,7 +1478,7 @@ cleanup:
 						else
 						{
 							// NOOP
-							// NSLog(@"Found interval. Meta bytes remaining: %d", metaDataBytesRemaining);
+							NSLog(@"Found interval. Meta bytes remaining: %d", metaDataBytesRemaining);
 						}
 						
 						continue;
