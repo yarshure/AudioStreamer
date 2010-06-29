@@ -49,7 +49,7 @@
 		C9E673060FE8C5650033BF43 /* stopbutton.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = stopbutton.png; path = "Shared Resources/stopbutton.png"; sourceTree = "<group>"; };
 		C9E673070FE8C5650033BF43 /* loadingbutton.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = loadingbutton.png; path = "Shared Resources/loadingbutton.png"; sourceTree = "<group>"; };
 		C9E673080FE8C5650033BF43 /* pausebutton.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = pausebutton.png; path = "Shared Resources/pausebutton.png"; sourceTree = "<group>"; };
-		C9E673410FE8C6510033BF43 /* iPhoneInfo.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = iPhoneInfo.plist; plistStructureDefinitionIdentifier = "com.apple.xcode.plist.structure-definition.iphone.info-plist"; sourceTree = "<group>"; };
+		C9E673410FE8C6510033BF43 /* iPhoneInfo.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = iPhoneInfo.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -240,7 +240,6 @@
 				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				GCC_C_LANGUAGE_STANDARD = c99;
-				GCC_PREPROCESSOR_DEFINITIONS = SHOUTCAST_METADATA;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 3.0;
@@ -257,7 +256,6 @@
 				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				GCC_C_LANGUAGE_STANDARD = c99;
-				GCC_PREPROCESSOR_DEFINITIONS = SHOUTCAST_METADATA;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 3.0;

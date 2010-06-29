@@ -23,8 +23,6 @@
 	IBOutlet UIView *volumeSlider;
 	IBOutlet UILabel *positionLabel;
 	IBOutlet UISlider *progressSlider;
-	IBOutlet UITextField *metadataArtist;
-	IBOutlet UITextField *metadataTitle;
 	AudioStreamer *streamer;
 	NSTimer *progressUpdateTimer;
 }

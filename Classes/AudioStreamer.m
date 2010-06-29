@@ -22,9 +22,6 @@
 
 NSString * const ASStatusChangedNotification = @"ASStatusChangedNotification";
 NSString * const ASPresentAlertWithTitleNotification = @"ASPresentAlertWithTitleNotification";
-#ifdef SHOUTCAST_METADATA
-NSString * const ASUpdateMetadataNotification = @"ASUpdateMetadataNotification";
-#endif
 
 NSString * const AS_NO_ERROR_STRING = @"No error.";
 NSString * const AS_FILE_STREAM_GET_PROPERTY_FAILED_STRING = @"File stream get property failed.";
@@ -230,9 +227,6 @@ void ASReadStreamCallBack
 	if (self != nil)
 	{
 		url = [aURL retain];
-#ifdef SHOUTCAST_METADATA
-		metaDataString = [[NSMutableString alloc] initWithString:@""];
-#endif
 	}
 	return self;
 }
@@ -246,9 +240,6 @@ void ASReadStreamCallBack
 {
 	[self stop];
 	[url release];
-#ifdef SHOUTCAST_METADATA
-	[metaDataString release];
-#endif
 	[super dealloc];
 }
 
@@ -610,9 +601,7 @@ void ASReadStreamCallBack
 		// Create the HTTP GET request
 		//
 		CFHTTPMessageRef message= CFHTTPMessageCreateRequest(NULL, (CFStringRef)@"GET", (CFURLRef)url, kCFHTTPVersion1_1);
-#ifdef SHOUTCAST_METADATA
-		CFHTTPMessageSetHeaderFieldValue(message, CFSTR("icy-metadata"), CFSTR("1"));
-#endif
+		
 		//
 		// If we are creating this request to seek to a location, set the
 		// requested byte range in the headers.
@@ -1152,20 +1141,6 @@ cleanup:
 	}
 }
 
-#ifdef SHOUTCAST_METADATA
-- (void)updateMetaData:(NSString *)metaData
-{
-	NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:metaData, @"metadata", nil];
-	NSNotification *notification =
-	[NSNotification
-	 notificationWithName:ASUpdateMetadataNotification
-	 object:self
-	 userInfo:userInfo];
-	[[NSNotificationCenter defaultCenter]
-	 postNotification:notification];
-}
-#endif
-
 //
 // handleReadFromStream:eventType:data:
 //
@@ -1325,176 +1300,6 @@ cleanup:
 			{
 				return;
 			}
-#ifdef SHOUTCAST_METADATA
-			// shoutcast parsing code from http://code.google.com/p/audiostreamer-meta/
-			// with modifications by John Fricker
-			// get and handle the shoutcast metadata
-			UInt8 bytesNoMetaData[kAQDefaultBufSize];
-			int lengthNoMetaData = 0;
-			int streamStart = 0;
-			if (metaDataInterval == 0)
-			{
-				CFHTTPMessageRef myResponse = (CFHTTPMessageRef)CFReadStreamCopyProperty(stream, kCFStreamPropertyHTTPResponseHeader);
-				UInt32 statusCode = CFHTTPMessageGetResponseStatusCode(myResponse);
-				
-				//CFStringRef myStatusLine = CFHTTPMessageCopyResponseStatusLine(myResponse);
-				
-				if (statusCode == 200)		// "OK" (this is true even for ICY)
-				{
-					// check if this is a ICY 200 OK response
-					NSString *icyCheck = [[[NSString alloc] initWithBytes:bytes length:10 encoding:NSUTF8StringEncoding] autorelease];
-					//NSLog(@"stream bytes %@", [NSString stringWithCString:bytes length:length]); // dataWithBytes:bytes length:1024]);
-					if (icyCheck != nil && [icyCheck caseInsensitiveCompare:@"ICY 200 OK"] == NSOrderedSame)	
-					{
-						foundIcyStart = YES;
-						//NSLog(@"ICY 200 OK");				
-					}
-					else
-					{
-						// is Live365?
-						// get all the headers
-						NSDictionary *reqHeaders = [(NSDictionary *)CFHTTPMessageCopyAllHeaderFields(myResponse) autorelease];
-						//NSLog(@"reqHeaders: %@", reqHeaders);
-						NSString *serverHeader = [reqHeaders valueForKey:@"Server"];
-						if (serverHeader != nil && NSEqualRanges([serverHeader rangeOfString:@"Nanocaster"], NSMakeRange(0, 10))) {
-							NSLog(@"Wrong stream type - can not continue to parse");
-							
-						} else {
-							// Not an ICY response
-							NSString *metaInt;
-							metaInt = (NSString *) CFHTTPMessageCopyHeaderFieldValue(myResponse, CFSTR("Icy-Metaint"));	
-							metaDataInterval = [metaInt intValue];
-							[metaInt release];
-							if (metaInt)
-							{
-								parsedHeaders = YES;
-							}
-						}
-					}
-				}
-				else if (statusCode == 302)
-				{
-					NSLog(@"unexpected 302");
-				}
-				else
-				{
-					// Invalid
-				}
-			} // if (metaDataInterval == 0)
-			
-			if (foundIcyStart && !foundIcyEnd)
-			{
-				char c1 = '\0';
-				char c2 = '\0';
-				char c3 = '\0';
-				char c4 = '\0';
-				int lineStart = streamStart;
-				while (YES)
-				{
-					if (streamStart + 3 > length)
-					{
-						break;
-					}
-					
-					c1 = bytes[streamStart];
-					c2 = bytes[streamStart+1];
-					c3 = bytes[streamStart+2];
-					c4 = bytes[streamStart+3];
-					
-					if (c1 == '\r' && c2 == '\n')
-					{		
-						// get the full string
-						NSString *fullString = [[[NSString alloc] initWithBytes:bytes length:streamStart encoding:NSUTF8StringEncoding] autorelease];
-						
-						// get the substring for this line
-						NSString *line = [fullString substringWithRange:NSMakeRange(lineStart, (streamStart-lineStart))];
-						
-						// check if this is icy-metaint
-						NSArray *lineItems = [line componentsSeparatedByString:@":"];
-						if ([lineItems count] > 1)
-						{
-							if ([[lineItems objectAtIndex:0] caseInsensitiveCompare:@"icy-metaint"] == NSOrderedSame)
-							{
-								metaDataInterval = [[lineItems objectAtIndex:1] intValue];
-								//NSLog(@"ICY MetaInt: %d", metaDataInterval);
-							}
-						}
-						
-						// this is the end of a line, the new line starts in 2
-						lineStart = streamStart+2; // (c3)
-						
-						if (c3 == '\r' && c4 == '\n')
-						{
-							foundIcyEnd = YES;
-							break;
-						}
-					}
-					
-					streamStart++;
-				} // end while
-				
-				if (foundIcyEnd)
-				{
-					streamStart = streamStart + 4;
-					//NSLog(@"Found End.");	
-					parsedHeaders = YES;
-				}
-			}
-			
-			if (parsedHeaders)
-			{
-				// look at each byte
-				for (int i=streamStart; i < length; i++)
-				{
-					// is this a metadata byte?
-					if (metaDataBytesRemaining > 0)
-					{
-						//NSLog(@"meta: %C", bytes[i]);
-						[metaDataString appendFormat:@"%c", bytes[i]];
-						
-						metaDataBytesRemaining -= 1;
-						
-						if (metaDataBytesRemaining == 0)
-						{
-							[self updateMetaData:metaDataString];
-							
-							dataBytesRead = 0;
-						}
-						continue;
-					}
-					
-					// is this the interval byte?
-					if (metaDataInterval > 0 && dataBytesRead == metaDataInterval)
-					{
-						metaDataBytesRemaining = bytes[i] * 16;
-						//NSLog(@"Found interval. Interval: %d, Meta Length: %d", metaDataInterval, metaDataBytesRemaining);
-
-						[metaDataString setString:@""];
-						
-						if (metaDataBytesRemaining == 0)
-						{
-							dataBytesRead = 0;
-						}
-						else
-						{
-							// NOOP
-							// NSLog(@"Found interval. Meta bytes remaining: %d", metaDataBytesRemaining);
-						}
-						
-						continue;
-					}
-					
-					// this is a data byte
-					dataBytesRead += 1;
-					
-					// copy the data to the new buffer
-					bytesNoMetaData[lengthNoMetaData] = bytes[i];
-					lengthNoMetaData += 1;
-				} // end for
-				
-				// pthread_mutex_unlock(&mutexMeta);
-			}	// end if parsedHeaders
-#endif
 		}
 
 		if (discontinuous)
