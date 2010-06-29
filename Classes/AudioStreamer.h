@@ -99,6 +99,10 @@ typedef enum
 extern NSString * const ASStatusChangedNotification;
 extern NSString * const ASPresentAlertWithTitleNotification;
 
+#ifdef SHOUTCAST_METADATA
+extern NSString * const ASUpdateMetadataNotification;
+#endif
+
 @interface AudioStreamer : NSObject
 {
 	NSURL *url;
@@ -156,6 +160,16 @@ extern NSString * const ASPresentAlertWithTitleNotification;
 								// time)
 	double packetDuration;		// sample rate times frames per packet
 	double lastProgress;		// last calculated progress point
+
+#ifdef SHOUTCAST_METADATA
+	BOOL foundIcyStart;
+	BOOL foundIcyEnd;
+	BOOL parsedHeaders;
+	unsigned int metaDataInterval;					// how many data bytes between meta data
+	unsigned int metaDataBytesRemaining;	// how many bytes of metadata remain to be read
+	unsigned int dataBytesRead;							// how many bytes of data have been read
+	NSMutableString *metaDataString;			// the metaDataString
+#endif
 }
 
 @property AudioStreamerErrorCode errorCode;
