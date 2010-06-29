@@ -1268,7 +1268,8 @@ cleanup:
 			httpHeaders =
 				(NSDictionary *)CFHTTPMessageCopyAllHeaderFields((CFHTTPMessageRef)message);
 			CFRelease(message);
-			
+			NSLog(@"headers %@", httpHeaders);
+
 			//
 			// Only read the content length if we seeked to time zero, otherwise
 			// we only have a subset of the total bytes.
@@ -1303,6 +1304,9 @@ cleanup:
 		
 		UInt8 bytes[kAQDefaultBufSize];
 		CFIndex length;
+		UInt8 bytesNoMetaData[kAQDefaultBufSize];
+		int lengthNoMetaData = 0;
+		
 		@synchronized(self)
 		{
 			if ([self isFinishing] || !CFReadStreamHasBytesAvailable(stream))
@@ -1329,8 +1333,7 @@ cleanup:
 			// shoutcast parsing code from http://code.google.com/p/audiostreamer-meta/
 			// with modifications by John Fricker
 			// get and handle the shoutcast metadata
-			UInt8 bytesNoMetaData[kAQDefaultBufSize];
-			int lengthNoMetaData = 0;
+
 			int streamStart = 0;
 			if (metaDataInterval == 0)
 			{
@@ -1354,19 +1357,53 @@ cleanup:
 						// is Live365?
 						// get all the headers
 						NSDictionary *reqHeaders = [(NSDictionary *)CFHTTPMessageCopyAllHeaderFields(myResponse) autorelease];
-						NSLog(@"reqHeaders: %@", reqHeaders);
+						//NSLog(@"reqHeaders: %@", reqHeaders);
 						NSString *serverHeader = [reqHeaders valueForKey:@"Server"];
 						if (serverHeader != nil && NSEqualRanges([serverHeader rangeOfString:@"Nanocaster"], NSMakeRange(0, 10))) {
 							NSLog(@"Wrong stream type - can not continue to parse");
 							
 						} else {
 							// Not an ICY response
-							NSString *metaInt;
+							/*NSString *metaInt;
 							metaInt = (NSString *) CFHTTPMessageCopyHeaderFieldValue(myResponse, CFSTR("Icy-Metaint"));	
 							metaDataInterval = [metaInt intValue];
 							[metaInt release];
 							if (metaInt)
 							{
+								parsedHeaders = YES;
+							}*/
+							NSString *metaInt;
+							NSString *contentType;
+							NSString *icyBr;
+							metaInt = (NSString *) CFHTTPMessageCopyHeaderFieldValue(myResponse, CFSTR("Icy-Metaint"));
+							contentType = (NSString *) CFHTTPMessageCopyHeaderFieldValue(myResponse, CFSTR("Content-Type"));
+							icyBr = (NSString *) CFHTTPMessageCopyHeaderFieldValue(myResponse, CFSTR("icy-br"));
+							/*if (contentType) 
+							{
+								// only if we haven't already set a content-type
+								if (!myData.streamContentType)
+								{
+									NSLog(@"Stream Content-Type: %@", contentType);
+									myData.streamContentType = contentType;
+									// if this is not an mp3 stream we need to restart the audio queue
+									if ([myData.streamContentType caseInsensitiveCompare:@"audio/mpeg"] != NSOrderedSame)
+									{
+										[myData restartAudioQueue];
+									}								
+								}
+							}*/
+							/*
+							if (bitRate == 0 && icyBr)
+							{
+								bitRate = [icyBr intValue];
+								NSLog(@"Stream Bitrate: %@", icyBr);
+								[myData updateBitrate:[icyBr intValue]];
+							}
+							*/
+							metaDataInterval = [metaInt intValue];
+							if (metaInt)
+							{
+								NSLog(@"MetaInt: %@", metaInt);
 								parsedHeaders = YES;
 							}
 						}
@@ -1408,7 +1445,8 @@ cleanup:
 						
 						// get the substring for this line
 						NSString *line = [fullString substringWithRange:NSMakeRange(lineStart, (streamStart-lineStart))];
-						
+						//NSLog(@"Header Line: %@. Length: %d", line, [line length]);
+
 						// check if this is icy-metaint
 						NSArray *lineItems = [line componentsSeparatedByString:@":"];
 						if ([lineItems count] > 1)
@@ -1416,10 +1454,33 @@ cleanup:
 							if ([[lineItems objectAtIndex:0] caseInsensitiveCompare:@"icy-metaint"] == NSOrderedSame)
 							{
 								metaDataInterval = [[lineItems objectAtIndex:1] intValue];
-								NSLog(@"ICY MetaInt: %d", metaDataInterval);
+								//NSLog(@"ICY MetaInt: %d", metaDataInterval);
 							}
 						}
-						
+/*						if ([[lineItems objectAtIndex:0] caseInsensitiveCompare:@"icy-br"] == NSOrderedSame)
+						{
+							uint32_t icybr = [[lineItems objectAtIndex:1] intValue];
+							if (bitRate == 0) {
+								bitRate = icybr;
+								NSLog(@"ICY BR: %d", icybr);
+								[myData updateBitrate:icybr];										
+							}
+						}
+						if ([[lineItems objectAtIndex:0] caseInsensitiveCompare:@"Content-Type"] == NSOrderedSame)
+						{
+							NSLog(@"ICY Stream Content-Type: %@", [lineItems objectAtIndex:1]);
+							// only if we haven't already set the content type
+							if (!myData.streamContentType)
+							{
+								myData.streamContentType = [lineItems objectAtIndex:1];
+								// if this is not an mp3 stream we need to restart the audio queue
+								if ([myData.streamContentType caseInsensitiveCompare:@"audio/mpeg"] != NSOrderedSame)
+								{
+									[myData restartAudioQueue];
+								}										
+							}
+						}
+	*/					
 						// this is the end of a line, the new line starts in 2
 						lineStart = streamStart+2; // (c3)
 						
@@ -1450,7 +1511,7 @@ cleanup:
 					if (metaDataBytesRemaining > 0)
 					{
 						//NSLog(@"meta: %C", bytes[i]);
-						[metaDataString appendFormat:@"%c", bytes[i]];
+						[metaDataString appendFormat:@"%C", bytes[i]];
 						
 						metaDataBytesRemaining -= 1;
 						
@@ -1496,7 +1557,61 @@ cleanup:
 			}	// end if parsedHeaders
 #endif
 		}
-
+#ifdef SHOUTCAST_METADATA
+		if (discontinuous)
+		{
+			/*
+			 * SHOUTcast can send the interval byte by itself. In that case lengthNoMetaData is 0, but
+			 * the interval byte should not be sent to the audio queue. The check for a metaDataInterval == 0
+			 * will make sure that we don't ever send in the interval byte on a stream with metadata
+			 */
+			
+			if (lengthNoMetaData > 0)
+			{
+				//NSLog(@"Parsing no meta bytes (Discontinuous).");
+				err = AudioFileStreamParseBytes(audioFileStream, lengthNoMetaData, bytesNoMetaData, kAudioFileStreamParseFlag_Discontinuity);
+				if (err)
+				{
+					[self failWithErrorCode:AS_FILE_STREAM_PARSE_BYTES_FAILED];
+					return;
+				}			
+			}
+			else if (metaDataInterval == 0)	// make sure this isn't a stream with metadata
+			{
+				//NSLog(@"Parsing normal bytes (Discontinuous).");
+				err = AudioFileStreamParseBytes(audioFileStream, length, bytes, kAudioFileStreamParseFlag_Discontinuity);
+				if (err)
+				{
+					[self failWithErrorCode:AS_FILE_STREAM_PARSE_BYTES_FAILED];
+					return;
+				}
+			}
+		}
+		else
+		{
+			if (lengthNoMetaData > 0)
+			{
+				//NSLog(@"Parsing no meta bytes.");
+				err = AudioFileStreamParseBytes(audioFileStream, lengthNoMetaData, bytesNoMetaData, 0);
+				if (err)
+				{
+					[self failWithErrorCode:AS_FILE_STREAM_PARSE_BYTES_FAILED];
+					return;
+				}
+			}
+			else if (metaDataInterval == 0)	// make sure this isn't a stream with metadata
+			{
+				//NSLog(@"Parsing normal bytes.");
+				err = AudioFileStreamParseBytes(audioFileStream, length, bytes, 0);
+				if (err)
+				{
+					[self failWithErrorCode:AS_FILE_STREAM_PARSE_BYTES_FAILED];
+					return;
+				}
+			}
+		} // end discontinuous
+		
+#else
 		if (discontinuous)
 		{
 			err = AudioFileStreamParseBytes(audioFileStream, length, bytes, kAudioFileStreamParseFlag_Discontinuity);
@@ -1515,6 +1630,7 @@ cleanup:
 				return;
 			}
 		}
+#endif
 	}
 }
 

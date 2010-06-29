@@ -51,7 +51,7 @@
 						<bool key="IBUIClearsContextBeforeDrawing">NO</bool>
 						<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
 						<int key="IBUIContentVerticalAlignment">0</int>
-						<string key="IBUIText">http://208.53.158.254:9100</string>
+						<string key="IBUIText">http://scfire-dtc-aa06.stream.aol.com:80/stream/1018</string>
 						<int key="IBUIBorderStyle">3</int>
 						<object class="NSColor" key="IBUITextColor">
 							<int key="NSColorSpace">3</int>
