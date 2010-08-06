@@ -15,6 +15,10 @@
 #import "AudioStreamer.h"
 #ifdef TARGET_OS_IPHONE			
 #import <CFNetwork/CFNetwork.h>
+#import "UIDevice+Hardware.h"
+#ifndef kCFCoreFoundationVersionNumber_iPhoneOS_4_0
+#define kCFCoreFoundationVersionNumber_iPhoneOS_4_0 550.32
+#endif
 #endif
 
 #define BitRateEstimationMaxPackets 5000
@@ -1944,7 +1948,18 @@ cleanup:
 			{
 				AudioStreamBasicDescription pasbd = formatList[i].mASBD;
 		
-				if (pasbd.mFormatID == kAudioFormatMPEG4AAC_HE)
+				if(pasbd.mFormatID == kAudioFormatMPEG4AAC_HE_V2 && 
+				   [[UIDevice currentDevice] platformHasCapability:(UIDeviceSupportsARMV7)] && 
+				   kCFCoreFoundationVersionNumber >= kCFCoreFoundationVersionNumber_iPhoneOS_4_0)
+				{
+					// We found HE-AAC v2 (SBR+PS), but before trying to play it
+					// we need to make sure that both the hardware and software are
+					// capable of doing so...
+#if !TARGET_IPHONE_SIMULATOR
+					asbd = pasbd;
+#endif
+					break;
+				} else if (pasbd.mFormatID == kAudioFormatMPEG4AAC_HE)
 				{
 					//
 					// We've found HE-AAC, remember this to tell the audio queue
