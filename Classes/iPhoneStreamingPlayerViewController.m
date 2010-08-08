@@ -148,8 +148,9 @@
 
 - (void)viewDidAppear:(BOOL)animated {
 	[super viewDidAppear:animated];
-	if(kCFCoreFoundationVersionNumber >= kCFCoreFoundationVersionNumber_iPhoneOS_4_0)
-		[[UIApplication sharedApplication] beginReceivingRemoteControlEvents];
+	UIApplication *application = [UIApplication sharedApplication];
+	if([application respondsToSelector:@selector(beginReceivingRemoteControlEvents)])
+		[application beginReceivingRemoteControlEvents];
 	[self becomeFirstResponder]; // this enables listening for events
 	// update the UI in case we were in the background
 	NSNotification *notification =
@@ -375,7 +376,7 @@
 	iPhoneStreamingPlayerAppDelegate *appDelegate = (iPhoneStreamingPlayerAppDelegate *)[[UIApplication sharedApplication] delegate];
 	if([streamer isMeteringEnabled] && appDelegate.uiIsVisible) {
 		[levelMeterView updateMeterWithLeftValue:[streamer averagePowerForChannel:0] 
-									  rightValue:[streamer averagePowerForChannel:1]];
+									  rightValue:[streamer averagePowerForChannel:([streamer numberOfChannels] > 1 ? 1 : 0)]];
 	}
 }
 

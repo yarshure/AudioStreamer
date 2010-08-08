@@ -13,9 +13,12 @@
 //
 
 #import "AudioStreamer.h"
-#ifdef TARGET_OS_IPHONE			
+#if TARGET_OS_IPHONE			
 #import <CFNetwork/CFNetwork.h>
 #import "UIDevice+Hardware.h"
+#define kCFCoreFoundationVersionNumber_MIN 550.32
+#else
+#define kCFCoreFoundationVersionNumber_MIN 550.00
 #endif
 
 #define BitRateEstimationMaxPackets 5000
@@ -65,7 +68,7 @@ NSString * const AS_AUDIO_BUFFER_TOO_SMALL_STRING = @"Audio packets are larger t
 - (void)handlePropertyChangeForQueue:(AudioQueueRef)inAQ
 	propertyID:(AudioQueuePropertyID)inID;
 
-#ifdef TARGET_OS_IPHONE
+#if TARGET_OS_IPHONE
 - (void)handleInterruptionChangeToState:(AudioQueuePropertyID)inInterruptionState;
 #endif
 
@@ -91,7 +94,7 @@ void MyPacketsProc(				void *							inClientData,
 								AudioStreamPacketDescription	*inPacketDescriptions);
 OSStatus MyEnqueueBuffer(AudioStreamer* myData);
 
-#ifdef TARGET_OS_IPHONE			
+#if TARGET_OS_IPHONE			
 void MyAudioSessionInterruptionListener(void *inClientData, UInt32 inInterruptionState);
 #endif
 
@@ -179,7 +182,7 @@ void MyAudioQueueIsRunningCallback(void *inUserData, AudioQueueRef inAQ, AudioQu
 	[streamer handlePropertyChangeForQueue:inAQ propertyID:inID];
 }
 
-#ifdef TARGET_OS_IPHONE			
+#if TARGET_OS_IPHONE			
 //
 // MyAudioSessionInterruptionListener
 //
@@ -782,7 +785,7 @@ void ASReadStreamCallBack
 			return;
 		}
 		
-	#ifdef TARGET_OS_IPHONE			
+	#if TARGET_OS_IPHONE			
 		//
 		// Set the audio session category so that we continue to play if the
 		// iPhone/iPod auto-locks.
@@ -889,7 +892,7 @@ cleanup:
 		pthread_mutex_destroy(&queueBuffersMutex);
 		pthread_cond_destroy(&queueBufferReadyCondition);
 
-#ifdef TARGET_OS_IPHONE			
+#if TARGET_OS_IPHONE			
 		AudioSessionSetActive(false);
 #endif
 
@@ -2010,14 +2013,17 @@ cleanup:
 			for (int i = 0; i * sizeof(AudioFormatListItem) < formatListSize; i += sizeof(AudioFormatListItem))
 			{
 				AudioStreamBasicDescription pasbd = formatList[i].mASBD;
-		
+
 				if(pasbd.mFormatID == kAudioFormatMPEG4AAC_HE_V2 && 
+#if TARGET_OS_IPHONE			
 				   [[UIDevice currentDevice] platformHasCapability:(UIDeviceSupportsARMV7)] && 
-				   kCFCoreFoundationVersionNumber >= kCFCoreFoundationVersionNumber_iPhoneOS_4_0)
+#endif
+				   kCFCoreFoundationVersionNumber >= kCFCoreFoundationVersionNumber_MIN)
 				{
 					// We found HE-AAC v2 (SBR+PS), but before trying to play it
 					// we need to make sure that both the hardware and software are
 					// capable of doing so...
+					NSLog(@"HE-AACv2 found!");
 #if !TARGET_IPHONE_SIMULATOR
 					asbd = pasbd;
 #endif
@@ -2325,7 +2331,7 @@ cleanup:
 	[pool release];
 }
 
-#ifdef TARGET_OS_IPHONE
+#if TARGET_OS_IPHONE
 //
 // handleInterruptionChangeForQueue:propertyID:
 //

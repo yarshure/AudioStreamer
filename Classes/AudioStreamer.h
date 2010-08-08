@@ -12,11 +12,8 @@
 //  appreciated but not required.
 //
 
-#ifdef TARGET_OS_IPHONE			
+#if TARGET_OS_IPHONE			
 #import <UIKit/UIKit.h>
-#ifndef kCFCoreFoundationVersionNumber_iPhoneOS_4_0
-#define kCFCoreFoundationVersionNumber_iPhoneOS_4_0 550.32
-#endif
 #else
 #import <Cocoa/Cocoa.h>
 #endif TARGET_OS_IPHONE			
