@@ -1268,7 +1268,7 @@ cleanup:
 			httpHeaders =
 				(NSDictionary *)CFHTTPMessageCopyAllHeaderFields((CFHTTPMessageRef)message);
 			CFRelease(message);
-			NSLog(@"headers %@", httpHeaders);
+			//NSLog(@"headers %@", httpHeaders);
 
 			//
 			// Only read the content length if we seeked to time zero, otherwise
@@ -1350,7 +1350,7 @@ cleanup:
 					if (icyCheck != nil && [icyCheck caseInsensitiveCompare:@"ICY 200 OK"] == NSOrderedSame)	
 					{
 						foundIcyStart = YES;
-						NSLog(@"ICY 200 OK");				
+						//NSLog(@"ICY 200 OK");				
 					}
 					else
 					{
@@ -1539,7 +1539,7 @@ cleanup:
 						else
 						{
 							// NOOP
-							NSLog(@"Found interval. Meta bytes remaining: %d", metaDataBytesRemaining);
+							//NSLog(@"Found interval. Meta bytes remaining: %d", metaDataBytesRemaining);
 						}
 						
 						continue;

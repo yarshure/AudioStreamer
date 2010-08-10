@@ -301,7 +301,7 @@
 		streamArtist = @"";
 	}
 	// this looks odd but not every server will have all artist hyphen title
-	if ([streamParts count] == 2) {
+	if ([streamParts count] >= 2) {
 		streamTitle = [streamParts objectAtIndex:1];
 	} else {
 		streamTitle = @"";
