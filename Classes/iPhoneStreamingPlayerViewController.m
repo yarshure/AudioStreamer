@@ -82,8 +82,13 @@
 		metadataArtist.text = currentArtist;
 	if (currentTitle)
 		metadataTitle.text = currentTitle;
-	
-	[self playbackStateChanged:NULL];
+	if (!streamer) {
+		[levelMeterView updateMeterWithLeftValue:0.0 
+									  rightValue:0.0];
+		[self setButtonImage:[UIImage imageNamed:@"playbutton.png"]];
+	}
+	else 
+		[self playbackStateChanged:NULL];
 }
 
 //
