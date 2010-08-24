@@ -30,6 +30,8 @@ NSString * const ASPresentAlertWithTitleNotification = @"ASPresentAlertWithTitle
 NSString * const ASUpdateMetadataNotification = @"ASUpdateMetadataNotification";
 #endif
 
+static AudioStreamer *__streamer = nil;
+
 NSString * const AS_NO_ERROR_STRING = @"No error.";
 NSString * const AS_FILE_STREAM_GET_PROPERTY_FAILED_STRING = @"File stream get property failed.";
 NSString * const AS_FILE_STREAM_SEEK_FAILED_STRING = @"File stream seek failed.";
@@ -190,8 +192,9 @@ void MyAudioQueueIsRunningCallback(void *inUserData, AudioQueueRef inAQ, AudioQu
 //
 void MyAudioSessionInterruptionListener(void *inClientData, UInt32 inInterruptionState)
 {
-	AudioStreamer* streamer = (AudioStreamer *)inClientData;
-	[streamer handleInterruptionChangeToState:inInterruptionState];
+	//AudioStreamer* streamer = (AudioStreamer *)inClientData;
+	//[streamer handleInterruptionChangeToState:inInterruptionState];
+	[__streamer handleInterruptionChangeToState:inInterruptionState];
 }
 #endif
 
@@ -803,6 +806,7 @@ void ASReadStreamCallBack
 			&sessionCategory
 		);
 		AudioSessionSetActive(true);
+		__streamer = self;
 	#endif
 	
 		// initialize a mutex and condition so that we can block on buffers in use.
@@ -1211,6 +1215,7 @@ cleanup:
 		else if (state == AS_PAUSED)
 		{
 			err = AudioQueueStart(audioQueue, NULL);
+			bgTaskId = [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler:NULL];
 			if (err)
 			{
 				[self failWithErrorCode:AS_AUDIO_QUEUE_START_FAILED];
@@ -1802,6 +1807,8 @@ cleanup:
 				if (self.state == AS_BUFFERING)
 				{
 					err = AudioQueueStart(audioQueue, NULL);
+					bgTaskId = [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler:NULL];
+					
 					if (err)
 					{
 						[self failWithErrorCode:AS_AUDIO_QUEUE_START_FAILED];
@@ -1814,6 +1821,8 @@ cleanup:
 					self.state = AS_WAITING_FOR_QUEUE_TO_START;
 
 					err = AudioQueueStart(audioQueue, NULL);
+					bgTaskId = [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler:NULL];
+					
 					if (err)
 					{
 						[self failWithErrorCode:AS_AUDIO_QUEUE_START_FAILED];
@@ -2291,6 +2300,7 @@ cleanup:
 	propertyID:(AudioQueuePropertyID)inID
 {
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	UIBackgroundTaskIdentifier newTaskId = UIBackgroundTaskInvalid;
 	
 	@synchronized(self)
 	{
@@ -2317,9 +2327,17 @@ cleanup:
 				// thread destruction order and seems to avoid this crash bug -- or
 				// at least I haven't had it since (nasty hard to reproduce error!)
 				//
+				newTaskId = [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler:NULL];
+				
 				[NSRunLoop currentRunLoop];
 
 				self.state = AS_PLAYING;
+				
+				if (bgTaskId != UIBackgroundTaskInvalid) {
+					[[UIApplication sharedApplication] endBackgroundTask: bgTaskId];
+				}
+				
+				bgTaskId = newTaskId;
 			}
 			else
 			{

@@ -424,12 +424,7 @@
 - (void)remoteControlReceivedWithEvent:(UIEvent *)event {
 	switch (event.subtype) {
 		case UIEventSubtypeRemoteControlTogglePlayPause:
-			if ([streamer isPlaying])
-				[streamer stop];
-			else {
-				[self createStreamer];
-				[streamer start];
-			}
+			[streamer pause];
 			break;
 		case UIEventSubtypeRemoteControlPlay:
 			[streamer start];
