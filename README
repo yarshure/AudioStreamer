@@ -1,14 +1,14 @@
 A fork of jfricker's AudioStreamer (which is a fork of the original AudioStreamer by mattgallagher)
 
-Forked this to get a number of community addons:
-- Shoutcast metadata
-- MIME type detection
-- HE-AACv2
-- Level Metering
-- NSThread memory leak
+Forked and cherry-picked to get a number of community addons and fixes:
+- Shoutcast metadata [jfricker]
+- MIME type detection [andybe]
+- HE-AACv2 [idevsoftware]
+- Level Metering [idevsoftware]
+- NSThread memory leak [mattgallagher]
 
-I made a few fixes:
-- Interruption crashes
+Fixes and features I've implemented:
+- Fixed interruption crashes
 - Background buffering
 - Play/pause from iPod controls
 - Stop all UI updating and timers while backgrounded
@@ -16,6 +16,6 @@ I made a few fixes:
 - Support for Pause button in UI
 - Local Notifications (outside app) on error
 
-My TODO:
+TODO:
 - Fix alert spam / Invisible alerts (only happens in app)?
 
