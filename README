@@ -2,7 +2,7 @@ A fork of jfricker's AudioStreamer (which is a fork of the original AudioStreame
 
 Forked and cherry-picked to get a number of community addons and fixes:
 - Shoutcast metadata [jfricker]
-- MIME type detection [andybe]
+- MIME type detection [andybee]
 - HE-AACv2 [idevsoftware]
 - Level Metering [idevsoftware]
 - NSThread memory leak [mattgallagher]
