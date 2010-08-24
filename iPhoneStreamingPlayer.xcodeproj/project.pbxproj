@@ -219,6 +219,7 @@
 				GCC_PREFIX_HEADER = iPhoneStreamingPlayer_Prefix.pch;
 				INFOPLIST_FILE = iPhoneInfo.plist;
 				PRODUCT_NAME = iPhoneStreamingPlayer;
+				SDKROOT = iphoneos4.0;
 			};
 			name = Debug;
 		};
