@@ -14,7 +14,8 @@ I made a few fixes:
 - Stop all UI updating and timers while backgrounded
 - Retina display example
 - Support for Pause button in UI
+- Local Notifications (outside app) on error
 
 My TODO:
-- Fix notification spam
+- Fix alert spam / Invisible alerts (only happens in app)?
 
