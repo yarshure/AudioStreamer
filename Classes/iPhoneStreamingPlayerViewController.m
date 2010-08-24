@@ -43,7 +43,7 @@
 	else
 	{
 		[button setImage:image forState:0];
-		
+	
 		if ([button.currentImage isEqual:[UIImage imageNamed:@"loadingbutton.png"]])
 		{
 			[self spinButton];
@@ -64,12 +64,61 @@
 			removeObserver:self
 			name:ASStatusChangedNotification
 			object:streamer];
-		[progressUpdateTimer invalidate];
-		progressUpdateTimer = nil;
+		[self createTimers:NO];
 		
 		[streamer stop];
 		[streamer release];
 		streamer = nil;
+	}
+}
+
+//
+// forceUIUpdate
+//
+// When foregrounded force UI update since we didn't update in the background
+//
+-(void)forceUIUpdate {
+	if (currentArtist)
+		metadataArtist.text = currentArtist;
+	if (currentTitle)
+		metadataTitle.text = currentTitle;
+	
+	[self playbackStateChanged:NULL];
+}
+
+//
+// createTimers
+//
+// Creates or destoys the timers
+//
+-(void)createTimers:(BOOL)create {
+	if (create) {
+		if (streamer) {
+				[self createTimers:NO];
+				progressUpdateTimer =
+				[NSTimer
+				 scheduledTimerWithTimeInterval:0.1
+				 target:self
+				 selector:@selector(updateProgress:)
+				 userInfo:nil
+				 repeats:YES];
+				levelMeterUpdateTimer = [NSTimer scheduledTimerWithTimeInterval:.1 
+																		 target:self 
+																	   selector:@selector(updateLevelMeters:) 
+																	   userInfo:nil 
+																		repeats:YES];
+		}
+	}
+	else {
+		if (progressUpdateTimer)
+		{
+			[progressUpdateTimer invalidate];
+			progressUpdateTimer = nil;
+		}
+		if(levelMeterUpdateTimer) {
+			[levelMeterUpdateTimer invalidate];
+			levelMeterUpdateTimer = nil;
+		}
 	}
 }
 
@@ -99,18 +148,8 @@
 	NSURL *url = [NSURL URLWithString:escapedValue];
 	streamer = [[AudioStreamer alloc] initWithURL:url];
 	
-	progressUpdateTimer =
-		[NSTimer
-			scheduledTimerWithTimeInterval:0.1
-			target:self
-			selector:@selector(updateProgress:)
-			userInfo:nil
-			repeats:YES];
-	levelMeterUpdateTimer = [NSTimer scheduledTimerWithTimeInterval:.1 
-															 target:self 
-														   selector:@selector(updateLevelMeters:) 
-														   userInfo:nil 
-															repeats:YES];
+	[self createTimers:YES];
+
 	[[NSNotificationCenter defaultCenter]
 		addObserver:self
 		selector:@selector(playbackStateChanged:)
@@ -225,7 +264,7 @@
 //
 - (IBAction)buttonPressed:(id)sender
 {
-	if ([button.currentImage isEqual:[UIImage imageNamed:@"playbutton.png"]])
+	if ([button.currentImage isEqual:[UIImage imageNamed:@"playbutton.png"]] || [button.currentImage isEqual:[UIImage imageNamed:@"pausebutton.png"]])
 	{
 		[downloadSourceField resignFirstResponder];
 		
@@ -264,24 +303,40 @@
 //
 - (void)playbackStateChanged:(NSNotification *)aNotification
 {
+	iPhoneStreamingPlayerAppDelegate *appDelegate = [[UIApplication sharedApplication] delegate];
+
 	if ([streamer isWaiting])
 	{
-		[levelMeterView updateMeterWithLeftValue:0.0 
-									  rightValue:0.0];
-		[streamer setMeteringEnabled:NO];
-		[self setButtonImage:[UIImage imageNamed:@"loadingbutton.png"]];
+		if (appDelegate.uiIsVisible) {
+			[levelMeterView updateMeterWithLeftValue:0.0 
+										   rightValue:0.0];
+			[streamer setMeteringEnabled:NO];
+			[self setButtonImage:[UIImage imageNamed:@"loadingbutton.png"]];
+		}
 	}
 	else if ([streamer isPlaying])
 	{
-		[streamer setMeteringEnabled:YES];
-		[self setButtonImage:[UIImage imageNamed:@"stopbutton.png"]];
+		if (appDelegate.uiIsVisible) {
+			[streamer setMeteringEnabled:YES];
+			[self setButtonImage:[UIImage imageNamed:@"stopbutton.png"]];
+		}
+	}
+	else if ([streamer isPaused]) {
+		if (appDelegate.uiIsVisible) {
+			[levelMeterView updateMeterWithLeftValue:0.0 
+										   rightValue:0.0];
+			[streamer setMeteringEnabled:NO];
+			[self setButtonImage:[UIImage imageNamed:@"pausebutton.png"]];
+		}
 	}
 	else if ([streamer isIdle])
 	{
-		[levelMeterView updateMeterWithLeftValue:0.0 
-									  rightValue:0.0];
+		if (appDelegate.uiIsVisible) {
+			[levelMeterView updateMeterWithLeftValue:0.0 
+										   rightValue:0.0];
+			[self setButtonImage:[UIImage imageNamed:@"playbutton.png"]];
+		}
 		[self destroyStreamer];
-		[self setButtonImage:[UIImage imageNamed:@"playbutton.png"]];
 	}
 }
 
@@ -331,6 +386,8 @@
 		metadataArtist.text = streamArtist;
 		metadataTitle.text = streamTitle;
 	}
+	currentArtist = streamArtist;
+	currentTitle = streamTitle;
 }
 #endif
 
@@ -406,15 +463,7 @@
 - (void)dealloc
 {
 	[self destroyStreamer];
-	if (progressUpdateTimer)
-	{
-		[progressUpdateTimer invalidate];
-		progressUpdateTimer = nil;
-	}
-	if(levelMeterUpdateTimer) {
-		[levelMeterUpdateTimer invalidate];
-		levelMeterUpdateTimer = nil;
-	}
+	[self createTimers:NO];
 	[levelMeterView release];
 	[super dealloc];
 }

@@ -26,6 +26,10 @@
 		C9E6730A0FE8C5650033BF43 /* stopbutton.png in Resources */ = {isa = PBXBuildFile; fileRef = C9E673060FE8C5650033BF43 /* stopbutton.png */; };
 		C9E6730B0FE8C5650033BF43 /* loadingbutton.png in Resources */ = {isa = PBXBuildFile; fileRef = C9E673070FE8C5650033BF43 /* loadingbutton.png */; };
 		C9E6730C0FE8C5650033BF43 /* pausebutton.png in Resources */ = {isa = PBXBuildFile; fileRef = C9E673080FE8C5650033BF43 /* pausebutton.png */; };
+		FCB039021224369600E538F7 /* loadingbutton@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = FCB038FE1224369600E538F7 /* loadingbutton@2x.png */; };
+		FCB039031224369600E538F7 /* pausebutton@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = FCB038FF1224369600E538F7 /* pausebutton@2x.png */; };
+		FCB039041224369600E538F7 /* playbutton@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = FCB039001224369600E538F7 /* playbutton@2x.png */; };
+		FCB039051224369600E538F7 /* stopbutton@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = FCB039011224369600E538F7 /* stopbutton@2x.png */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -56,6 +60,10 @@
 		C9E673070FE8C5650033BF43 /* loadingbutton.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = loadingbutton.png; path = "Shared Resources/loadingbutton.png"; sourceTree = "<group>"; };
 		C9E673080FE8C5650033BF43 /* pausebutton.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = pausebutton.png; path = "Shared Resources/pausebutton.png"; sourceTree = "<group>"; };
 		C9E673410FE8C6510033BF43 /* iPhoneInfo.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = iPhoneInfo.plist; sourceTree = "<group>"; };
+		FCB038FE1224369600E538F7 /* loadingbutton@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "loadingbutton@2x.png"; path = "Shared Resources/loadingbutton@2x.png"; sourceTree = "<group>"; };
+		FCB038FF1224369600E538F7 /* pausebutton@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "pausebutton@2x.png"; path = "Shared Resources/pausebutton@2x.png"; sourceTree = "<group>"; };
+		FCB039001224369600E538F7 /* playbutton@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "playbutton@2x.png"; path = "Shared Resources/playbutton@2x.png"; sourceTree = "<group>"; };
+		FCB039011224369600E538F7 /* stopbutton@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "stopbutton@2x.png"; path = "Shared Resources/stopbutton@2x.png"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -125,6 +133,10 @@
 		29B97317FDCFA39411CA2CEA /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				FCB038FE1224369600E538F7 /* loadingbutton@2x.png */,
+				FCB038FF1224369600E538F7 /* pausebutton@2x.png */,
+				FCB039001224369600E538F7 /* playbutton@2x.png */,
+				FCB039011224369600E538F7 /* stopbutton@2x.png */,
 				C9E672FF0FE8C55B0033BF43 /* iPhoneStreamingPlayerViewController.xib */,
 				C9E673010FE8C55B0033BF43 /* MainWindow.xib */,
 				C9E673050FE8C5650033BF43 /* playbutton.png */,
@@ -206,6 +218,10 @@
 				C9E6730A0FE8C5650033BF43 /* stopbutton.png in Resources */,
 				C9E6730B0FE8C5650033BF43 /* loadingbutton.png in Resources */,
 				C9E6730C0FE8C5650033BF43 /* pausebutton.png in Resources */,
+				FCB039021224369600E538F7 /* loadingbutton@2x.png in Resources */,
+				FCB039031224369600E538F7 /* pausebutton@2x.png in Resources */,
+				FCB039041224369600E538F7 /* playbutton@2x.png in Resources */,
+				FCB039051224369600E538F7 /* stopbutton@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

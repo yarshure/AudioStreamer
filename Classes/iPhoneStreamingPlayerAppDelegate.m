@@ -23,6 +23,7 @@
 
 @synthesize uiIsVisible;
 - (void)applicationDidFinishLaunching:(UIApplication *)application {
+	self.uiIsVisible = YES;
 		NSDictionary *credentialStorage =
 			[[NSURLCredentialStorage sharedCredentialStorage] allCredentials];
 		NSLog(@"Credentials: %@", credentialStorage);
@@ -89,6 +90,7 @@
      If your application supports background execution, called instead of applicationWillTerminate: when the user quits.
      */
 	self.uiIsVisible = NO;
+	[viewController createTimers:NO];
 }
 
 
@@ -97,6 +99,8 @@
      Called as part of  transition from the background to the inactive state: here you can undo many of the changes made on entering the background.
      */
 	self.uiIsVisible = YES;
+	[viewController createTimers:YES];
+	[viewController forceUIUpdate];
 	[[NSNotificationCenter defaultCenter]
 	 addObserver:self
 	 selector:@selector(presentAlertWithTitle:)
