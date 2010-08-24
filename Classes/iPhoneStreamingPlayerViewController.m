@@ -15,6 +15,7 @@
 #import "iPhoneStreamingPlayerAppDelegate.h"
 #import "iPhoneStreamingPlayerViewController.h"
 #import "AudioStreamer.h"
+#import "LevelMeterView.h"
 #import <QuartzCore/CoreAnimation.h>
 #import <MediaPlayer/MediaPlayer.h>
 #import <CFNetwork/CFNetwork.h>
@@ -105,6 +106,11 @@
 			selector:@selector(updateProgress:)
 			userInfo:nil
 			repeats:YES];
+	levelMeterUpdateTimer = [NSTimer scheduledTimerWithTimeInterval:.1 
+															 target:self 
+														   selector:@selector(updateLevelMeters:) 
+														   userInfo:nil 
+															repeats:YES];
 	[[NSNotificationCenter defaultCenter]
 		addObserver:self
 		selector:@selector(playbackStateChanged:)
@@ -135,6 +141,9 @@
 	[volumeView sizeToFit];
 	
 	[self setButtonImage:[UIImage imageNamed:@"playbutton.png"]];
+	
+	levelMeterView = [[LevelMeterView alloc] initWithFrame:CGRectMake(10.0, 310.0, 300.0, 60.0)];
+	[self.view addSubview:levelMeterView];
 }
 
 - (void)viewDidAppear:(BOOL)animated {
@@ -256,14 +265,20 @@
 {
 	if ([streamer isWaiting])
 	{
+		[levelMeterView updateMeterWithLeftValue:0.0 
+									  rightValue:0.0];
+		[streamer setMeteringEnabled:NO];
 		[self setButtonImage:[UIImage imageNamed:@"loadingbutton.png"]];
 	}
 	else if ([streamer isPlaying])
 	{
+		[streamer setMeteringEnabled:YES];
 		[self setButtonImage:[UIImage imageNamed:@"stopbutton.png"]];
 	}
 	else if ([streamer isIdle])
 	{
+		[levelMeterView updateMeterWithLeftValue:0.0 
+									  rightValue:0.0];
 		[self destroyStreamer];
 		[self setButtonImage:[UIImage imageNamed:@"playbutton.png"]];
 	}
@@ -351,6 +366,20 @@
 	}
 }
 
+
+//
+// updateLevelMeters:
+//
+
+- (void)updateLevelMeters:(NSTimer *)timer {
+	iPhoneStreamingPlayerAppDelegate *appDelegate = (iPhoneStreamingPlayerAppDelegate *)[[UIApplication sharedApplication] delegate];
+	if([streamer isMeteringEnabled] && appDelegate.uiIsVisible) {
+		[levelMeterView updateMeterWithLeftValue:[streamer averagePowerForChannel:0] 
+									  rightValue:[streamer averagePowerForChannel:1]];
+	}
+}
+
+
 //
 // textFieldShouldReturn:
 //
@@ -381,6 +410,11 @@
 		[progressUpdateTimer invalidate];
 		progressUpdateTimer = nil;
 	}
+	if(levelMeterUpdateTimer) {
+		[levelMeterUpdateTimer invalidate];
+		levelMeterUpdateTimer = nil;
+	}
+	[levelMeterView release];
 	[super dealloc];
 }
 

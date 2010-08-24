@@ -219,6 +219,8 @@ void ASReadStreamCallBack
 @synthesize state;
 @synthesize bitRate;
 @synthesize httpHeaders;
+@synthesize numberOfChannels;
+
 
 //
 // initWithURL
@@ -1122,6 +1124,68 @@ cleanup:
 	return (fileLength - dataOffset) / (calculatedBitRate * 0.125);
 }
 
+
+//
+// isMeteringEnabled
+//
+
+- (BOOL)isMeteringEnabled {
+	UInt32 enabled;
+	UInt32 propertySize = sizeof(UInt32);
+	OSStatus status = AudioQueueGetProperty(audioQueue, kAudioQueueProperty_EnableLevelMetering, &enabled, &propertySize);
+	if(!status) {
+		return (enabled == 1);
+	}
+	return NO;
+}
+
+
+//
+// setMeteringEnabled
+//
+
+- (void)setMeteringEnabled:(BOOL)enable {
+	if(enable == [self isMeteringEnabled])
+		return;
+	UInt32 enabled = (enable ? 1 : 0);
+	OSStatus status = AudioQueueSetProperty(audioQueue, kAudioQueueProperty_EnableLevelMetering, &enabled, sizeof(UInt32));
+	// do something if failed?
+	if(status)
+		return;
+}
+
+
+// level metering
+- (float)peakPowerForChannel:(NSUInteger)channelNumber {
+	if(![self isMeteringEnabled] || channelNumber >= [self numberOfChannels])
+		return 0;
+	float peakPower = 0;
+	UInt32 propertySize = [self numberOfChannels] * sizeof(AudioQueueLevelMeterState);
+	AudioQueueLevelMeterState *audioLevels = calloc(sizeof(AudioQueueLevelMeterState), [self numberOfChannels]);
+	OSStatus status = AudioQueueGetProperty(audioQueue, kAudioQueueProperty_CurrentLevelMeter, audioLevels, &propertySize);
+	if(!status) {
+		peakPower = audioLevels[channelNumber].mPeakPower;
+	}
+	free(audioLevels);
+	return peakPower;
+}
+
+
+- (float)averagePowerForChannel:(NSUInteger)channelNumber {
+	if(![self isMeteringEnabled] || channelNumber >= [self numberOfChannels])
+		return 0;
+	float peakPower = 0;
+	UInt32 propertySize = [self numberOfChannels] * sizeof(AudioQueueLevelMeterState);
+	AudioQueueLevelMeterState *audioLevels = calloc(sizeof(AudioQueueLevelMeterState), [self numberOfChannels]);
+	OSStatus status = AudioQueueGetProperty(audioQueue, kAudioQueueProperty_CurrentLevelMeter, audioLevels, &propertySize);
+	if(!status) {
+		peakPower = audioLevels[channelNumber].mAveragePower;
+	}
+	free(audioLevels);
+	return peakPower;
+}
+
+
 //
 // pause
 //
@@ -1785,6 +1849,8 @@ cleanup:
 {
 	sampleRate = asbd.mSampleRate;
 	packetDuration = asbd.mFramesPerPacket / sampleRate;
+	
+	numberOfChannels = asbd.mChannelsPerFrame;
 	
 	// create the audio queue
 	err = AudioQueueNewOutput(&asbd, MyAudioQueueOutputCallback, self, NULL, NULL, 0, &audioQueue);

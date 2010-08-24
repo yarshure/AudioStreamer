@@ -159,6 +159,17 @@ extern NSString * const ASPresentAlertWithTitleNotification;
 								// time)
 	double packetDuration;		// sample rate times frames per packet
 	double lastProgress;		// last calculated progress point
+	UInt32 numberOfChannels;	// Number of audio channels in the stream (1 = mono, 2 = stereo)
+
+#ifdef SHOUTCAST_METADATA
+	BOOL foundIcyStart;
+	BOOL foundIcyEnd;
+	BOOL parsedHeaders;
+	unsigned int metaDataInterval;					// how many data bytes between meta data
+	unsigned int metaDataBytesRemaining;	// how many bytes of metadata remain to be read
+	unsigned int dataBytesRead;							// how many bytes of data have been read
+	NSMutableString *metaDataString;			// the metaDataString
+#endif
 }
 
 @property AudioStreamerErrorCode errorCode;
@@ -167,6 +178,9 @@ extern NSString * const ASPresentAlertWithTitleNotification;
 @property (readonly) double duration;
 @property (readwrite) UInt32 bitRate;
 @property (readonly) NSDictionary *httpHeaders;
+@property (readonly) UInt32 numberOfChannels;
+@property (assign, getter=isMeteringEnabled) BOOL meteringEnabled;
+
 
 - (id)initWithURL:(NSURL *)aURL;
 - (void)start;
@@ -178,6 +192,11 @@ extern NSString * const ASPresentAlertWithTitleNotification;
 - (BOOL)isIdle;
 - (void)seekToTime:(double)newSeekTime;
 - (double)calculatedBitRate;
+
+// level metering
+- (float)peakPowerForChannel:(NSUInteger)channelNumber;
+- (float)averagePowerForChannel:(NSUInteger)channelNumber;
+
 
 @end
 
