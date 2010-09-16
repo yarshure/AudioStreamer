@@ -357,6 +357,8 @@
 {
 	NSString *streamArtist;
 	NSString *streamTitle;
+    //NSLog(@"Raw meta data = %@", [[aNotification userInfo] objectForKey:@"metadata"]);
+          
 	NSArray *metaParts = [[[aNotification userInfo] objectForKey:@"metadata"] componentsSeparatedByString:@";"];
 	NSString *item;
 	NSMutableDictionary *hash = [[NSMutableDictionary alloc] init];
