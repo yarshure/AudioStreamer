@@ -11,6 +11,7 @@
 //  this copyright and permission notice. Attribution in compiled projects is
 //  appreciated but not required.
 //
+#define SHOUTCAST_METADATA
 
 #if TARGET_OS_IPHONE			
 #import <UIKit/UIKit.h>
@@ -101,6 +102,9 @@ typedef enum
 
 extern NSString * const ASStatusChangedNotification;
 extern NSString * const ASPresentAlertWithTitleNotification;
+#ifdef SHOUTCAST_METADATA
+extern NSString * const ASUpdateMetadataNotification;
+#endif
 
 @interface AudioStreamer : NSObject
 {

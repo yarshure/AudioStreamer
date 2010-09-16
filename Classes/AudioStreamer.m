@@ -1283,8 +1283,7 @@ cleanup:
 	 notificationWithName:ASUpdateMetadataNotification
 	 object:self
 	 userInfo:userInfo];
-	[[NSNotificationCenter defaultCenter]
-	 postNotification:notification];
+	[[NSNotificationCenter defaultCenter] postNotification:notification];
 }
 #endif
 
@@ -1422,10 +1421,13 @@ cleanup:
 			}
 		}
 		
+        
 		UInt8 bytes[kAQDefaultBufSize];
 		CFIndex length;
-		//UInt8 bytesNoMetaData[kAQDefaultBufSize];
-		//int lengthNoMetaData = 0;
+#ifdef SHOUTCAST_METADATA
+		UInt8 bytesNoMetaData[kAQDefaultBufSize];
+		int lengthNoMetaData = 0;
+#endif        
 		
 		@synchronized(self)
 		{
@@ -1523,7 +1525,7 @@ cleanup:
 							metaDataInterval = [metaInt intValue];
 							if (metaInt)
 							{
-								NSLog(@"MetaInt: %@", metaInt);
+								//NSLog(@"MetaInt: %@", metaInt);
 								parsedHeaders = YES;
 							}
 						}
@@ -1531,7 +1533,7 @@ cleanup:
 				}
 				else if (statusCode == 302)
 				{
-					NSLog(@"unexpected 302");
+					//NSLog(@"unexpected 302");
 				}
 				else
 				{

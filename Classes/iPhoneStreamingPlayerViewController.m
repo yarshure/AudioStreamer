@@ -22,6 +22,8 @@
 
 @implementation iPhoneStreamingPlayerViewController
 
+@synthesize currentArtist, currentTitle;
+
 //
 // setButtonImage:
 //
@@ -82,6 +84,7 @@
 		metadataArtist.text = currentArtist;
 	if (currentTitle)
 		metadataTitle.text = currentTitle;
+     
 	if (!streamer) {
 		[levelMeterView updateMeterWithLeftValue:0.0 
 									  rightValue:0.0];
@@ -393,8 +396,8 @@
 		metadataArtist.text = streamArtist;
 		metadataTitle.text = streamTitle;
 	}
-	currentArtist = streamArtist;
-	currentTitle = streamTitle;
+	self.currentArtist = streamArtist;
+	self.currentTitle = streamTitle;
 }
 #endif
 
