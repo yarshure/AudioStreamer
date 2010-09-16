@@ -30,7 +30,10 @@ NSString * const ASPresentAlertWithTitleNotification = @"ASPresentAlertWithTitle
 NSString * const ASUpdateMetadataNotification = @"ASUpdateMetadataNotification";
 #endif
 
+
+#if TARGET_OS_IPHONE	
 static AudioStreamer *__streamer = nil;
+#endif
 
 NSString * const AS_NO_ERROR_STRING = @"No error.";
 NSString * const AS_FILE_STREAM_GET_PROPERTY_FAILED_STRING = @"File stream get property failed.";
@@ -1215,7 +1218,9 @@ cleanup:
 		else if (state == AS_PAUSED)
 		{
 			err = AudioQueueStart(audioQueue, NULL);
+#if TARGET_OS_IPHONE            
 			bgTaskId = [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler:NULL];
+#endif            
 			if (err)
 			{
 				[self failWithErrorCode:AS_AUDIO_QUEUE_START_FAILED];
@@ -1807,8 +1812,9 @@ cleanup:
 				if (self.state == AS_BUFFERING)
 				{
 					err = AudioQueueStart(audioQueue, NULL);
+#if TARGET_OS_IPHONE                    
 					bgTaskId = [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler:NULL];
-					
+#endif					
 					if (err)
 					{
 						[self failWithErrorCode:AS_AUDIO_QUEUE_START_FAILED];
@@ -1821,8 +1827,9 @@ cleanup:
 					self.state = AS_WAITING_FOR_QUEUE_TO_START;
 
 					err = AudioQueueStart(audioQueue, NULL);
+#if TARGET_OS_IPHONE                    
 					bgTaskId = [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler:NULL];
-					
+#endif					
 					if (err)
 					{
 						[self failWithErrorCode:AS_AUDIO_QUEUE_START_FAILED];
@@ -2300,8 +2307,9 @@ cleanup:
 	propertyID:(AudioQueuePropertyID)inID
 {
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+#if TARGET_OS_IPHONE    
 	UIBackgroundTaskIdentifier newTaskId = UIBackgroundTaskInvalid;
-	
+#endif	
 	@synchronized(self)
 	{
 		if (inID == kAudioQueueProperty_IsRunning)
@@ -2327,17 +2335,21 @@ cleanup:
 				// thread destruction order and seems to avoid this crash bug -- or
 				// at least I haven't had it since (nasty hard to reproduce error!)
 				//
+#if TARGET_OS_IPHONE                
 				newTaskId = [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler:NULL];
+#endif                
 				
 				[NSRunLoop currentRunLoop];
 
 				self.state = AS_PLAYING;
-				
+
+#if TARGET_OS_IPHONE				
 				if (bgTaskId != UIBackgroundTaskInvalid) {
 					[[UIApplication sharedApplication] endBackgroundTask: bgTaskId];
 				}
 				
 				bgTaskId = newTaskId;
+#endif                
 			}
 			else
 			{

@@ -104,7 +104,9 @@ extern NSString * const ASPresentAlertWithTitleNotification;
 
 @interface AudioStreamer : NSObject
 {
+#if TARGET_OS_IPHONE    
 	UIBackgroundTaskIdentifier bgTaskId;
+#endif    
 	NSURL *url;
 
 	//
