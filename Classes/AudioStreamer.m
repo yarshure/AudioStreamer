@@ -2169,7 +2169,8 @@ cleanup:
 				// If there was some kind of issue with enqueueBuffer and we didn't
 				// make space for the new audio data then back out
 				//
-				if (bytesFilled + packetSize >= packetBufferSize)
+                //http://github.com/mattgallagher/AudioStreamer/issues/#issue/22
+				if (bytesFilled + packetSize > packetBufferSize)
 				{
 					return;
 				}
