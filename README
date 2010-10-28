@@ -11,6 +11,8 @@ Forked and cherry-picked to get a number of community addons and fixes:
 - Fix compilation issues in Mac OS X Sample App [sebsto]
 - Fix compilation issue when SHOUTCAST_METADAT flag is defined [sebsto]
 - Fix iPhone apps crashes in SHOUTCAST_METADATA mode when returning from Background [sebsto]
+- Album metadata [nickpack]
+- Buffer fill percentage [rayh]
 
 Fixes and features I've implemented:
 - Fixed interruption crashes
