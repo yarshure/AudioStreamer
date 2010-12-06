@@ -14,6 +14,7 @@ Forked and cherry-picked to get a number of community addons and fixes:
 - Album metadata [nickpack]
 - Buffer fill percentage [rayh]
 - Possible fix for playing non-VBR WAV streams [isalkind]
+- Invalid byte range header fix [whyz]
 
 Fixes and features I've implemented:
 - Fixed interruption crashes
