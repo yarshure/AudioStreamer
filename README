@@ -13,6 +13,7 @@ Forked and cherry-picked to get a number of community addons and fixes:
 - Fix iPhone apps crashes in SHOUTCAST_METADATA mode when returning from Background [sebsto]
 - Album metadata [nickpack]
 - Buffer fill percentage [rayh]
+- Possible fix for playing non-VBR WAV streams [isalkind]
 
 Fixes and features I've implemented:
 - Fixed interruption crashes
