@@ -955,6 +955,7 @@ cleanup:
 					initWithTarget:self
 					selector:@selector(startInternal)
 					object:nil];
+			[internalThread setName:@"InternalThread"];
 			[internalThread start];
 		}
 	}
