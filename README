@@ -15,6 +15,7 @@ Forked and cherry-picked to get a number of community addons and fixes:
 - Buffer fill percentage [rayh]
 - Possible fix for playing non-VBR WAV streams [isalkind]
 - Invalid byte range header fix [whyz]
+- Compatibility with OS3.x [bradfordcp]
 
 Fixes and features I've implemented:
 - Fixed interruption crashes
