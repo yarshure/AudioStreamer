@@ -1,3 +1,15 @@
+======
+example private musci format decode
+
+code use in mac app store
+https://itunes.apple.com/cn/app/fei-le-dian-tai/id491643056?mt=12
+iOS App Store
+https://itunes.apple.com/us/app/fei-le-yin-le-jing-xuan/id492607981?mt=8
+this app online music Library have  offline, so I open my work on decode private music format file.
+
+yarhusre
+2012.12.07 Shanghai 
+
 A fork of DigitalDJ's AudioStreamer (which is a fork jfricker's AudioStreamer (which is a fork of the original AudioStreamer by mattgallagher))
 
 
